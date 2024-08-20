@@ -1,4 +1,4 @@
-import { required } from "joi";
+
 import { Schema, model } from "mongoose";
 
 const UserSchema = new Schema(
@@ -40,6 +40,6 @@ const UserSchema = new Schema(
 );
 
 
-const User = model("user", userSchema);
+const User = model("user", UserSchema);
 
 export default User;
