@@ -1,14 +1,14 @@
-import User from "../models/User.js";
+import Customer from "../models/Customer.js";
 import bcrypt from "bcrypt";
 
 const signup = async (data) => {
   const { password } = data;
   const hashPassword = await bcrypt.hash(password, 8);
-  return User.create({ ...data, password: hashPassword });
+  return Customer.create({ ...data, password: hashPassword });
 };
 
 const setToken = (id, token = "") => {
-  return User.findByIdAndUpdate(id, { token });
+  return Customer.findByIdAndUpdate(id, { token });
 };
 
 export default { signup, setToken };

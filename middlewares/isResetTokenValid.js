@@ -1,6 +1,6 @@
 import { isValidObjectId } from "mongoose";
 import HttpError from "../helpers/HttpError.js";
-import User from "../models/User.js";
+import Customer from "../models/Customer.js";
 import ResetToken from "../models/ResetToken.js";
 
 const isResetTokenValid = async (req, res, next) => {
@@ -14,12 +14,12 @@ const isResetTokenValid = async (req, res, next) => {
     throw HttpError(404, "Invalid user!");
   }
 
-  const user = await User.findById(id);
+  const customer = await Customer.findById(id);
   if (!user) {
     throw HttpError(404, "User not found!");
   }
 
-  const resetToken = await ResetToken.findOne({owner: user._id});
+  const resetToken = await ResetToken.findOne({owner: customer._id});
   if(!resetToken){
     throw HttpError(404, "Reset token not found!");
   }
@@ -30,7 +30,7 @@ const isResetTokenValid = async (req, res, next) => {
   }
 
 
-  req.user = user;
+  req.customer = customer;
 
   next()
 

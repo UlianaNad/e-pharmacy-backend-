@@ -1,9 +1,9 @@
 
 import { Schema, model } from "mongoose";
 
-const UserSchema = new Schema(
+const CustomerSchema = new Schema(
   {
-    username: {
+    name: {
       type: String,
       maxLength: 32,
       default: null,
@@ -40,6 +40,6 @@ const UserSchema = new Schema(
 );
 
 
-const User = model("user", UserSchema);
+const Customer = model("customer", CustomerSchema);
 
-export default User;
+export default Customer;

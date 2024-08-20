@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import HttpError from "../helpers/HttpError.js";
-import userServices from "../services/userServices.js";
+import customerServices from "../services/customerServices.js";
 
 const { JWT_SECRET } = process.env;
 
@@ -12,11 +12,11 @@ const authenticate = async (req, _, next) => {
   }
   try {
     const { id } = jwt.verify(token, JWT_SECRET);
-    const user = await userServices.findUserById(id);
-    if (!user || !user.token) {
+    const customer = await customerServices.findUCustomerById(id);
+    if (!customer || !customer.token) {
       return next(HttpError(401, "Not authorized"));
     }
-    req.user = user;
+    req.customer = customer;
     next();
   } catch (error) {
     next(HttpError(401, "Not authorized"));

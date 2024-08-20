@@ -1,6 +1,6 @@
-import User from "../models/User.js";
+import Customer from "../models/Customer.js";
 import authServices from "../services/authServices.js";
-import userServices from "../services/userServices.js";
+import customerServices from "../services/customerServices.js";
 import HttpError from "../helpers/HttpError.js";
 import ctrlWrapper from "../decorators/ctrlWrapper.js";
 import bcrypt from "bcrypt";
@@ -12,6 +12,8 @@ import { nanoid } from "nanoid";
 //import sendEmail from "../helpers/sendEmail.js";
 import ResetToken from "../models/ResetToken.js";
 //import webp from "webp-converter";
+import "dotenv/config";
+
 
 const {
   JWT_SECRET,
@@ -25,14 +27,14 @@ const {
 
 const register = async (req, res) => {
   const { email } = req.body;
-  const user = await userServices.findUser({ email });
-  if (user) {
+  const customer = await customerServices.findCustomer({ email });
+  if (customer) {
     throw HttpError(409, "Email in use");
   }
 
   const verificationToken = nanoid();
 
-  const newUser = await authServices.signup({
+  const newCustomer = await authServices.signup({
     ...req.body,
     verificationToken,
   });
@@ -59,22 +61,22 @@ const register = async (req, res) => {
 //   await sendEmail(verifyEmail);
 
   res.status(201).json({
-    user: {
-      email: newUser.email,
+    customer: {
+      email: newCustomer.email,
     },
   });
 };
 
 const verify = async (req, res) => {
   const { verificationToken } = req.params;
-  const user = await userServices.findUser({ verificationToken });
+  const customer = await customerServices.findCustomer({ verificationToken });
 
-  if (!user) {
-    throw HttpError(404, "User not found");
+  if (!customer) {
+    throw HttpError(404, "Customer not found");
   }
 
-  await userServices.updateUser(
-    { _id: user._id },
+  await customerServices.updateCustomer(
+    { _id: customer._id },
     { verify: true, verificationToken: "" }
   );
 
@@ -121,51 +123,51 @@ const verify = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await userServices.findUser({ email });
+  const customer = await customerServices.findCustomer({ email });
 
-  if (!user) {
+  if (!customer) {
     throw HttpError(401, "Email is wrong!");
   }
 
-  if (!user.verify) {
+  if (!customer.verify) {
     throw HttpError(401, "Email not verified!");
   }
 
-  const passwordCompare = await bcrypt.compare(password, user.password);
+  const passwordCompare = await bcrypt.compare(password, customer.password);
   if (!passwordCompare) {
     throw HttpError(401, "Password is wrong! Try again!");
   }
 
   const payload = {
-    id: user._id,
+    id: customer._id,
   };
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });
 
-  await authServices.setToken(user._id, token);
+  await authServices.setToken(customer._id, token);
 
   res.json({
     token,
-    user: {
+    customer: {
       email,
-      username: user.username,
+      name: customer.name,
     },
   });
 };
 
 const getCurrent = (req, res) => {
-  const { email, username } = req.user;
+  const { email, name } = req.customer;
 
   res.json({
-    user: {
+    customer: {
       email,
-      username,
+      name,
     },
   });
 };
 
 const logout = async (req, res) => {
-  const { _id } = req.user;
+  const { _id } = req.customer;
   await authServices.setToken(_id);
 
   res.status(204).json({
@@ -173,15 +175,15 @@ const logout = async (req, res) => {
   });
 };
 
-const updateUser = async (req, res) => {
-  const { _id: owner, password } = req.user;
+const updateCustomer = async (req, res) => {
+  const { _id: owner, password } = req.customer;
   const { new_password, password: old_password, email } = req.body;
   const changedData = { ...req.body };
 
   if (old_password && new_password) {
-    const user = await userServices.findUserById(owner);
-    if (!user) {
-      throw HttpError(404, "User not found!");
+    const customer = await customerServices.findCustomerById(owner);
+    if (!customer) {
+      throw HttpError(404, "Customer not found!");
     }
 
     const passwordCompare = await bcrypt.compare(old_password, password);
@@ -192,8 +194,8 @@ const updateUser = async (req, res) => {
     changedData.password = await bcrypt.hash(new_password, 8);
   }
 
-  const user = await userServices.findUser({ email });
-  if (user) {
+  const customer = await customerServices.findCustomer({ email });
+  if (customer) {
     throw HttpError(409, "Email is already used");
   }
 
@@ -214,7 +216,7 @@ const updateUser = async (req, res) => {
 //     await unlink(webpPath);
 //   }
 
-  const newUser = await userServices.updateUser(owner, changedData);
+  const newCustomer = await customerServices.updateCustomer(owner, changedData);
 
 //   if (req.file && newUser && avatarURL !== null) {
 //     const avatar_id = avatarURL.split("/").pop().split(".")[0];
@@ -222,9 +224,9 @@ const updateUser = async (req, res) => {
 //   }
 
   res.status(201).json({
-    user: {
-      email: newUser.email,
-      username: newUser.username,
+    customer: {
+      email: newCustomer.email,
+      name: newCustomer.name,
     },
   });
 };
@@ -236,12 +238,12 @@ const forgotPassword = async (req, res) => {
   if (!email) {
     throw HttpError(404, "Please provide the valid email!");
   }
-  const user = await userServices.findUser({ email });
-  if (!user) {
-    throw HttpError(404, "User not found!");
+  const customer = await customerServices.findCustomer({ email });
+  if (!customer) {
+    throw HttpError(404, "Customer not found!");
   }
 
-  const token = await ResetToken.findOne({ owner: user._id });
+  const token = await ResetToken.findOne({ owner: customer._id });
   if (token) {
     throw HttpError(
       404,
@@ -249,7 +251,7 @@ const forgotPassword = async (req, res) => {
     );
   }
 
-  const resetToken = new ResetToken({ owner: user._id, token: nanoid() });
+  const resetToken = new ResetToken({ owner: customer._id, token: nanoid() });
   await resetToken.save();
 
 //   const verifyEmail = {
@@ -283,13 +285,13 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   const { password } = req.body;
 
-  const user = await User.findById(req.user._id);
+  const customer = await Customer.findById(req.customer._id);
 
-  if (!user) {
-    throw HttpError(404, "User not found!");
+  if (!customer) {
+    throw HttpError(404, "Customer not found!");
   }
 
-  if (user.password === password) {
+  if (customer.password === password) {
     throw HttpError(409, "Password must be different!");
   }
 
@@ -297,10 +299,10 @@ const resetPassword = async (req, res) => {
     throw HttpError(401, "Password must be 8 to 64 characters long!");
   }
 
-  user.password = await bcrypt.hash(password, 8);
-  await user.save();
+  customer.password = await bcrypt.hash(password, 8);
+  await customer.save();
 
-  await ResetToken.findOneAndDelete({ owner: user._id });
+  await ResetToken.findOneAndDelete({ owner: customer._id });
 
 //   const verifyEmail = {
 //     from: {
@@ -335,7 +337,7 @@ export default {
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
-  updateUser: ctrlWrapper(updateUser),
+  updateCustomer: ctrlWrapper(updateCustomer),
   forgotPassword: ctrlWrapper(forgotPassword),
   resetPassword: ctrlWrapper(resetPassword),
 };
