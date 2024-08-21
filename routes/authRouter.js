@@ -17,7 +17,7 @@ authRouter.get("/verify/:verificationToken", authControllers.verify);
 
 // authRouter.post(
 //   "/verify",
-//   validateBody(usersSchemas.verifySchema),
+//   validateBody(customerSchemas.verifySchema),
 //   authControllers.resendVerifyEmail
 // );
 

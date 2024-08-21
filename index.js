@@ -5,6 +5,7 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import authRouter from "./routes/authRouter.js";
 import pharmaciesRouter from './routes/pharmaciesRouter.js'
+import productRouter from "./routes/productRouter.js";
 
 dotenv.config();
 const { PORT, DB_HOST } = process.env;
@@ -17,6 +18,7 @@ app.use(express.json());
 
 app.use("/api/user", authRouter);
 app.use("/api/stores", pharmaciesRouter);
+app.use("/api/products", productRouter);
 
 app.use((err, req, res, next) => {
     const { status = 500, message = "Server error"} = err;
