@@ -13,6 +13,7 @@ import { nanoid } from "nanoid";
 import ResetToken from "../models/ResetToken.js";
 //import webp from "webp-converter";
 import "dotenv/config";
+import sendEmail from "../helpers/sendEmail.js";
 
 
 const {
@@ -39,26 +40,26 @@ const register = async (req, res) => {
     verificationToken,
   });
 
-//   const verifyEmail = {
-//     from: {
-//       email: SENDGRID_FROM,
-//       name: "Welcome to Water tracker",
-//     },
-//     personalizations: [
-//       {
-//         to: [{ email: email }],
+  const verifyEmail = {
+    from: {
+      email: SENDGRID_FROM,
+      name: "Welcome to E-Pharmacy",
+    },
+    personalizations: [
+      {
+        to: [{ email: email }],
 
-//         dynamic_template_data: {
-//           email: email,
-//           BASE_URL: BASE_URL,
-//           verificationToken: verificationToken,
-//         },
-//       },
-//     ],
-//     template_id: WELCOME_EMAIL,
-//   };
+        dynamic_template_data: {
+          email: email,
+          BASE_URL: BASE_URL,
+          verificationToken: verificationToken,
+        },
+      },
+    ],
+    template_id: WELCOME_EMAIL,
+  };
 
-//   await sendEmail(verifyEmail);
+  await sendEmail(verifyEmail);
 
   res.status(201).json({
     customer: {
@@ -70,7 +71,7 @@ const register = async (req, res) => {
 const verify = async (req, res) => {
   const { verificationToken } = req.params;
   const customer = await customerServices.findCustomer({ verificationToken });
-
+console.log(customer)
   if (!customer) {
     throw HttpError(404, "Customer not found");
   }
@@ -80,9 +81,9 @@ const verify = async (req, res) => {
     { verify: true, verificationToken: "" }
   );
 
-//   res.redirect(
-//     "https://julika-gulchitai.github.io/capybara-components-frontend/signin"
-//   );
+  res.redirect(
+    `https://${BASE_URL}/`
+  );
 };
 
 // const resendVerifyEmail = async (req, res) => {

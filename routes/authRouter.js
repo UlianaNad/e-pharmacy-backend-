@@ -29,7 +29,7 @@ authRouter.post(
 
 authRouter.post("/logout", authenticate, authControllers.logout);
 
-authRouter.get("/current", authenticate, authControllers.getCurrent);
+authRouter.get("/user-info", authenticate, authControllers.getCurrent);
 
 // authRouter.patch(
 //   "/update",
