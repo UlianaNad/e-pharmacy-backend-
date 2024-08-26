@@ -71,7 +71,7 @@ const register = async (req, res) => {
 const verify = async (req, res) => {
   const { verificationToken } = req.params;
   const customer = await customerServices.findCustomer({ verificationToken });
-console.log(customer)
+
   if (!customer) {
     throw HttpError(404, "Customer not found");
   }
@@ -86,40 +86,40 @@ console.log(customer)
   );
 };
 
-// const resendVerifyEmail = async (req, res) => {
-//   const { email } = req.body;
-//   const user = await userServices.findUser({ email });
+const resendVerifyEmail = async (req, res) => {
+  const { email } = req.body;
+  const user = await customerServices.findCustomer({ email });
 
-//   if (!user) {
-//     throw HttpError(404, "User not found");
-//   }
-//   if (user.verify) {
-//     throw HttpError(400, "Verification has already been passed");
-//   }
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+  if (user.verify) {
+    throw HttpError(400, "Verification has already been passed");
+  }
 
-//   const verifyEmail = {
-//     from: {
-//       email: SENDGRID_FROM,
-//       name: "Water tracker",
-//     },
-//     personalizations: [
-//       {
-//         to: [{ email: email }],
+  const verifyEmail = {
+    from: {
+      email: SENDGRID_FROM,
+      name: "E-Pharmacy",
+    },
+    personalizations: [
+      {
+        to: [{ email: email }],
 
-//         dynamic_template_data: {
-//           email: email,
-//           BASE_URL: BASE_URL,
-//           verificationToken: verificationToken,
-//         },
-//       },
-//     ],
-//     template_id: TEMPLATE_ID,
-//   };
+        dynamic_template_data: {
+          email: email,
+          BASE_URL: BASE_URL,
+          verificationToken: verificationToken,
+        },
+      },
+    ],
+    template_id: TEMPLATE_ID,
+  };
 
-//   await sendEmail(verifyEmail);
+  await sendEmail(verifyEmail);
 
-//   res.json({ message: "Verification email sent" });
-// };
+  res.json({ message: "Verification email sent" });
+};
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -200,29 +200,7 @@ const updateCustomer = async (req, res) => {
     throw HttpError(409, "Email is already used");
   }
 
-//   if (req.file) {
-//     const { path: filePath } = req.file;
-//     const webpPath = `${filePath.split(".")[0]}.webp`;
-//     const image = await Jimp.read(filePath);
-//     await image.cover(250, 250).write(filePath);
-//     await webp.cwebp(filePath, webpPath, "-q 100");
-//     let { url: photo } = await cloudinary.uploader.upload(webpPath, {
-//       folder: "avatars",
-//     });
-
-//     photo = photo.replace("http", "https");
-
-//     changedData.avatarURL = photo;
-//     await unlink(filePath);
-//     await unlink(webpPath);
-//   }
-
   const newCustomer = await customerServices.updateCustomer(owner, changedData);
-
-//   if (req.file && newUser && avatarURL !== null) {
-//     const avatar_id = avatarURL.split("/").pop().split(".")[0];
-//     await cloudinary.uploader.destroy(`avatars/${avatar_id}`);
-//   }
 
   res.status(201).json({
     customer: {
@@ -255,27 +233,27 @@ const forgotPassword = async (req, res) => {
   const resetToken = new ResetToken({ owner: customer._id, token: nanoid() });
   await resetToken.save();
 
-//   const verifyEmail = {
-//     from: {
-//       email: SENDGRID_FROM,
-//       name: "Forgot password",
-//     },
-//     personalizations: [
-//       {
-//         to: [{ email: email }],
+  const verifyEmail = {
+    from: {
+      email: SENDGRID_FROM,
+      name: "Forgot password",
+    },
+    personalizations: [
+      {
+        to: [{ email: email }],
 
-//         dynamic_template_data: {
-//           email: email,
-//           id: user._id.toString(),
-//           BASE_URL2: BASE_URL2,
-//           token: resetToken.token,
-//         },
-//       },
-//     ],
-//     template_id: FORGOT_PASSWORD_EMAIL,
-//   };
+        dynamic_template_data: {
+          email: email,
+          id: user._id.toString(),
+          BASE_URL2: BASE_URL2,
+          token: resetToken.token,
+        },
+      },
+    ],
+    template_id: FORGOT_PASSWORD_EMAIL,
+  };
 
-//   await sendEmail(verifyEmail);
+  await sendEmail(verifyEmail);
 
   res.json({
     success: true,
@@ -305,25 +283,25 @@ const resetPassword = async (req, res) => {
 
   await ResetToken.findOneAndDelete({ owner: customer._id });
 
-//   const verifyEmail = {
-//     from: {
-//       email: SENDGRID_FROM,
+  const verifyEmail = {
+    from: {
+      email: SENDGRID_FROM,
 
-//       name: "You have requested to changed your password",
-//     },
-//     personalizations: [
-//       {
-//         to: [{ email: user.email }],
+      name: "You have requested to changed your password",
+    },
+    personalizations: [
+      {
+        to: [{ email: user.email }],
 
-//         dynamic_template_data: {
-//           email: user.email,
-//         },
-//       },
-//     ],
-//     template_id: CHANGED_PASSWORD_EMAIL,
-//   };
+        dynamic_template_data: {
+          email: user.email,
+        },
+      },
+    ],
+    template_id: CHANGED_PASSWORD_EMAIL,
+  };
 
-//   await sendEmail(verifyEmail);
+  await sendEmail(verifyEmail);
 
   res.json({
     success: true,
@@ -334,7 +312,7 @@ const resetPassword = async (req, res) => {
 export default {
   register: ctrlWrapper(register),
   verify: ctrlWrapper(verify),
-//   resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
+  resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),

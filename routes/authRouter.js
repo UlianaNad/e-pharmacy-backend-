@@ -15,11 +15,11 @@ authRouter.post(
 
 authRouter.get("/verify/:verificationToken", authControllers.verify);
 
-// authRouter.post(
-//   "/verify",
-//   validateBody(customerSchemas.verifySchema),
-//   authControllers.resendVerifyEmail
-// );
+authRouter.post(
+  "/verify",
+  validateBody(customerSchemas.verifySchema),
+  authControllers.resendVerifyEmail
+);
 
 authRouter.post(
   "/login",
@@ -31,13 +31,13 @@ authRouter.post("/logout", authenticate, authControllers.logout);
 
 authRouter.get("/user-info", authenticate, authControllers.getCurrent);
 
-// authRouter.patch(
-//   "/update",
-//   authenticate,
-//   upload.single("avatarURL"),
-//   validateBody(usersSchemas.updateSchema),
-//   authControllers.updateUser
-// );
+authRouter.patch(
+  "/update",
+  authenticate,
+  // upload.single("avatarURL"),
+  validateBody(customerSchemas.updateSchema),
+  authControllers.updateCustomer
+);
 
 authRouter.post(
   "/forgot-password",
