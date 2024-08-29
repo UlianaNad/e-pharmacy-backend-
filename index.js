@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import authRouter from "./routes/authRouter.js";
 import pharmaciesRouter from './routes/pharmaciesRouter.js'
 import productRouter from "./routes/productRouter.js";
+import reviewsRouter from "./routes/reviewsRouter.js";
 
 dotenv.config();
 const { PORT, DB_HOST } = process.env;
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/api/user", authRouter);
 app.use("/api/stores", pharmaciesRouter);
 app.use("/api/products", productRouter);
+app.use("/api/customer-reviews", reviewsRouter)
 
 
 app.use((err, req, res, next) => {
